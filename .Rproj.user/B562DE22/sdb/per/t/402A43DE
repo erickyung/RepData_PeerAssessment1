@@ -1,0 +1,17 @@
+{
+    "contents" : "## The dataset can be downloaded from the link below\n## https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip\ndata <- read.table(unz(\"activity.zip\", \"activity.csv\"), sep = \",\", header = TRUE)\ndata$IsWeekend <- weekdays(as.Date(data$date)) %in% c(\"Saturday\", \"Sunday\")\ndata$IsWeekend <- factor(data$IsWeekend, labels = c(\"Weekday\", \"Weekend\"))\n\n\ntotalStepsPerDay <- aggregate(data$steps, by = list(data$date), FUN = sum)\nnames(totalStepsPerDay) <- c(\"date\", \"steps\")\nhist(totalStepsPerDay$steps, breaks = 20, ylim = range(0, 10),\n     col = \"gray\", main = \"Histogram of Steps taken per day\", xlab = \"Steps\")\nmeanStepsPerDay = mean(totalStepsPerDay$steps, na.rm = TRUE)\nmedianStepsPerDay = median(totalStepsPerDay$steps, na.rm = TRUE)\n\n\ncleanData <- data[!is.na(data$steps), ]\nstepsPer5MinInterval <- aggregate(cleanData$steps, by = list(cleanData$interval), FUN = mean)\nnames(stepsPer5MinInterval) <- c(\"interval\", \"steps\")\nwith(stepsPer5MinInterval, plot(interval, steps, type = \"l\", main = \"Average # of Steps per interval\",\n                                xlab = \"Interval\", ylab = \"Steps\", col = \"blue\"))\nmaxSteps <- max(stepsPer5MinInterval$steps)\nmaxStepsInterval <- stepsPer5MinInterval[stepsPer5MinInterval$steps == maxSteps, ]$interval\n\n\nnumOfNARows <- nrow(data[is.na(data$steps), ])\npercentageOfNARows <- numOfNARows / nrow(data)\nnewData <- data\nnaRows <- is.na(newData$steps)\nfor (i in 1:nrow(newData[naRows, ])) {\n    interval <- newData[naRows, ][i, \"interval\"]\n    date <- newData[naRows, ][i, \"date\"]\n    steps <- stepsPer5MinInterval[stepsPer5MinInterval$interval == interval, \"steps\"]\n    if (length(steps) != 0){\n        newData[naRows, ][i, \"steps\"] <-\n            stepsPer5MinInterval[stepsPer5MinInterval$interval == interval, \"steps\"]\n    } else {\n        newData[naRows, ][i, \"steps\"] <- mean(cleanData[cleanData$date == date, ]$steps)\n    }\n}\nnewTotalStepsPerDay <- aggregate(newData$steps, by = list(newData$date), FUN = sum)\nnames(newTotalStepsPerDay) <- c(\"date\", \"steps\")\nhist(newTotalStepsPerDay$steps, breaks = 20, ylim = range(0, 20),\n     col = \"gray\", main = \"Histogram of Steps taken per day\", xlab = \"Steps\")\nnewMeanStepsPerDay = mean(newTotalStepsPerDay$steps, na.rm = TRUE)\nnewMedianStepsPerDay = median(newTotalStepsPerDay$steps, na.rm = TRUE)\n\nnewStepsPer5MinInterval <- aggregate(newData$steps, by = list(newData$interval, newData$IsWeekend), FUN = mean)\nnames(newStepsPer5MinInterval) <- c(\"interval\", \"IsWeekend\", \"steps\")\nlibrary(lattice)\nxyplot(steps ~ interval | IsWeekend, data = newStepsPer5MinInterval, type = \"l\",\n       xlab = \"Interval\", ylab = \"Number of Steps\", layout = c(1, 2))",
+    "created" : 1415677873454.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4135685170",
+    "id" : "402A43DE",
+    "lastKnownWriteTime" : 1416116501,
+    "path" : "C:/GitHub/RepData_PeerAssessment1/code.R",
+    "project_path" : "code.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
